@@ -12,15 +12,15 @@ spec:
     spec:
       containers:
         - name: web
-          image: bestcars:latest
+          image: us.icr.io/sn-labs-naborpabor/bestcars-web:latest
           ports: [{containerPort: 8000}]
           env:
-            - {name: BACKEND_URL, value: 'http://backend:3030'}
-            - {name: SENTIMENT_URL, value: 'http://sentiment:5000'}
+            - {name: BACKEND_URL, value: 'http://bestcars-backend:3030'}
+            - {name: SENTIMENT_URL, value: 'http://bestcars-sentiment:5000'}
           readinessProbe:
             httpGet: {path: '/', port: 8000}
           resources:
-            requests: {cpu: '100m', memory: '128Mi'}
+            requests: {cpu: '100m', memory: '256Mi'}
             limits: {cpu: '500m', memory: '512Mi'}
 ---
 apiVersion: v1
@@ -29,3 +29,83 @@ metadata: {name: bestcars}
 spec:
   selector: {app: bestcars}
   ports: [{port: 8000, targetPort: 8000}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: bestcars-mongo}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: bestcars-mongo}}
+  template:
+    metadata: {labels: {app: bestcars-mongo}}
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports: [{containerPort: 27017}]
+          volumeMounts: [{name: mongo-data, mountPath: /data/db}]
+          resources:
+            requests: {cpu: '100m', memory: '256Mi'}
+            limits: {cpu: '500m', memory: '768Mi'}
+      volumes: [{name: mongo-data, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: bestcars-mongo}
+spec:
+  selector: {app: bestcars-mongo}
+  ports: [{port: 27017, targetPort: 27017}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: bestcars-backend}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: bestcars-backend}}
+  template:
+    metadata: {labels: {app: bestcars-backend}}
+    spec:
+      containers:
+        - name: backend
+          image: us.icr.io/sn-labs-naborpabor/bestcars-backend:latest
+          ports: [{containerPort: 3030}]
+          env:
+            - {name: MONGO_URL, value: 'mongodb://bestcars-mongo:27017/dealershipsDB'}
+          readinessProbe:
+            httpGet: {path: '/', port: 3030}
+          resources:
+            requests: {cpu: '50m', memory: '128Mi'}
+            limits: {cpu: '300m', memory: '256Mi'}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: bestcars-backend}
+spec:
+  selector: {app: bestcars-backend}
+  ports: [{port: 3030, targetPort: 3030}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: bestcars-sentiment}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: bestcars-sentiment}}
+  template:
+    metadata: {labels: {app: bestcars-sentiment}}
+    spec:
+      containers:
+        - name: sentiment
+          image: us.icr.io/sn-labs-naborpabor/bestcars-sentiment:latest
+          ports: [{containerPort: 5000}]
+          readinessProbe:
+            httpGet: {path: '/', port: 5000}
+          resources:
+            requests: {cpu: '50m', memory: '128Mi'}
+            limits: {cpu: '300m', memory: '384Mi'}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: bestcars-sentiment}
+spec:
+  selector: {app: bestcars-sentiment}
+  ports: [{port: 5000, targetPort: 5000}]

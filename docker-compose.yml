@@ -18,7 +18,7 @@ services:
       BACKEND_URL: http://backend:3030
       SENTIMENT_URL: http://sentiment:5000
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-demo-change-before-production}
-      ALLOWED_HOSTS: localhost,127.0.0.1
+      ALLOWED_HOSTS: localhost,127.0.0.1,.labs.cognitiveclass.ai,.appdomain.cloud
     depends_on: [backend,sentiment]
     ports: ["8000:8000"]
 volumes:
