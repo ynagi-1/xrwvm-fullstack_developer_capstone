@@ -28,7 +28,12 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'educational-local-key-do-not-u
 DEBUG = os.environ.get('DJANGO_DEBUG','true').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','localhost,127.0.0.1,.labs.cognitiveclass.ai,.appdomain.cloud').split(',')
-CSRF_TRUSTED_ORIGINS = ['https://*.labs.cognitiveclass.ai','https://*.appdomain.cloud']
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://*.labs.cognitiveclass.ai,https://*.appdomain.cloud,'
+    'https://naborpabor-8000.theiadockernext-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai'
+).split(',')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
