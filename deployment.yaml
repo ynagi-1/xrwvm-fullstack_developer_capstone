@@ -12,13 +12,16 @@ spec:
     spec:
       containers:
         - name: web
-          image: us.icr.io/sn-labs-naborpabor/bestcars-web:latest
+          image: us.icr.io/sn-labs-naborpabor/bestcars-web:verified
           ports: [{containerPort: 8000}]
           env:
             - {name: BACKEND_URL, value: 'http://bestcars-backend:3030'}
             - {name: SENTIMENT_URL, value: 'http://bestcars-sentiment:5000'}
           readinessProbe:
-            httpGet: {path: '/', port: 8000}
+            httpGet:
+              path: '/'
+              port: 8000
+              httpHeaders: [{name: Host, value: localhost}]
           resources:
             requests: {cpu: '100m', memory: '256Mi'}
             limits: {cpu: '500m', memory: '512Mi'}

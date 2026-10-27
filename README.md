@@ -1,5 +1,8 @@
 # fullstack_developer_capstone
 
+Repository name: `xrwvm-fullstack_developer_capstone`.
+Project name: `fullstack_developer_capstone`.
+
 Best Cars dealership review portal built from the IBM Skills Network starter.
 
 ## Architecture
